@@ -58,7 +58,7 @@ export default class ControlsArea extends PureComponent {
 
     render() {
         const { translateX } = this.state
-        const { height } = this.props
+        const { height, winner } = this.props
 
         console.log('Controls rendered')
 
@@ -79,7 +79,7 @@ export default class ControlsArea extends PureComponent {
                     <Animated.View style={viewStyle} {...this._panResponder.panHandlers}>
                         <TouchableWithoutFeedback onPress={this.afire}>
                             <View ref={this.cannonRef}>
-                                <Sprite image='cannon'/>
+                                {winner !== 2 && <Sprite image='cannon'/>}
                             </View>
                         </TouchableWithoutFeedback>
                     </Animated.View>

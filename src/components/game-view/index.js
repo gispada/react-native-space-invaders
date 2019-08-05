@@ -32,7 +32,8 @@ export default class GameView extends PureComponent {
             explosion,
             clearExplosion,
             updatePlayerPosition,
-            lives
+            lives,
+            winner
         } = this.props
 
         return (
@@ -42,15 +43,20 @@ export default class GameView extends PureComponent {
 
                 <View style={styles.container}>
 
-                    <UpperBar score={score} highest={highest} lives={lives}/>
+                    <UpperBar score={score} highest={highest} lives={lives} />
 
                     <AliensGrid config={aliens} width={width} height={height} />
 
-                    {explosion.length > 0 && <Explosion variant='1' position={explosion} onAnimationEnd={clearExplosion} />}
+                    {explosion.length > 0 &&
+                        <Explosion
+                            variant={explosion[1] === 0 ? '2' : '1'} // Solo il cannone ha y = 0
+                            position={explosion}
+                            onAnimationEnd={clearExplosion}
+                        />}
 
                     {this.renderRockets}
 
-                    <ControlsArea fire={fire} width={width} height={height} updatePlayerPosition={updatePlayerPosition}/>
+                    <ControlsArea winner={winner} fire={fire} width={width} height={height} updatePlayerPosition={updatePlayerPosition} />
 
                 </View>
 

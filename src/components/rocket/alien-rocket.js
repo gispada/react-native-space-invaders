@@ -51,6 +51,9 @@ export default class AlienRocket extends PureComponent {
         // Nel caso degli alieni, converte la posizione da top: +x a bottom: +x
         const rocketYPosition = limit - (position + (limit - rocketData.y))
 
+        // Prima di arrivare al cannone, non serve controllare
+        if (rocketYPosition > 80) return
+        
         // Per il corretto calcolo delle collisioni, bisogna usare la posizione del giocatore dall'alto, non dal basso
         const y2Threshold = 50 // sopra: altezza del cannone dal basso, che rimane fissa
         const x1Threshold = playerXPosition + 0 // sinistra

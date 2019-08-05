@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react'
-import { Dimensions } from 'react-native'
+import { Dimensions, Alert } from 'react-native'
 import GameView from './src/components/game-view'
 import options from './src/config'
 
@@ -10,7 +10,7 @@ export default class App extends PureComponent {
     winner: 0, // 0: nessuno, 1: giocatore, 2: computer
     speed: options.startingGameSpeed,
     playerXPosition: width / 2,
-    lives: options.numberOfLives,
+    lives: 3,
     aliens: [],
     direction: 1,
     down: false,
@@ -30,7 +30,8 @@ export default class App extends PureComponent {
     const { winner, aliens } = this.state
 
     // Un alieno in meno, aumentare la velocità
-    if (!prevState.aliens.length && prevState.aliens.length !== aliens.length) {
+    // Non deve essere chiamato all'init (quando prima c'era un vincitore) o non resetta la velocità!
+    if (!prevState.winner && !!prevState.aliens.length && prevState.aliens.length !== aliens.length) {
       clearInterval(this.run)
       // Velocità aumenta di x% rispetto al suo ultimo valore
       const newSpeed = (prevState.speed - (prevState.speed * options.speedMultiplier)).toFixed(0)
@@ -46,23 +47,42 @@ export default class App extends PureComponent {
 
 
   initGame() {
+    const { winner } = this.state
+
+    if (this.delay) clearTimeout(this.delay)
+    if (winner) this.initializeState()
+
     this.generateAliens()
-    if (this.run) clearInterval(this.run)
     this.run = setInterval(() => this.renderFrame(), this.state.speed)
   }
 
 
+  initializeState() {
+    const common = {
+      winner: 0,
+      speed: options.startingGameSpeed,
+      direction: 1,
+      down: false
+    }
+    this.setState(this.state.winner === 1 ? { ...common } : { ...common, lives: options.numberOfLives, aliens: [], score: 0 })
+    if (this.run) clearInterval(this.run)
+  }
+
+
   victory() {
-    alert('HAI VINTO')
     clearInterval(this.run)
+    this.delay = setTimeout(() => this.initGame(), 500)
   }
 
 
   gameOver() {
-    const { score, highest } = this.state
+    const { score, highest, playerXPosition } = this.state
     clearInterval(this.run)
-    alert('Game over')
-    this.setState({ highest: Math.max(score, highest) })
+    this.setState({ highest: Math.max(score, highest), explosion: [playerXPosition, 0] })
+    Alert.alert('GAME OVER', 'Gli alieni hanno vinto!', [
+      { text: 'Esci', onPress: () => console.log('Esci'), style: 'cancel' },
+      { text: 'Nuova partita', onPress: () => this.initGame() }
+    ])
   }
 
 
@@ -99,7 +119,7 @@ export default class App extends PureComponent {
 
 
   moveAliens(dX, dY) {
-    const { aliens, direction } = this.state
+    const { aliens, direction, playerXPosition } = this.state
 
     // Con alieni su più file, l'inversione al limite è ripetuta per ogni fila, causando un bug sulla direzione, che viene invertita più volte
     // Il controllo è effettuato quindi solo una volta, se bisogna invertire inutile controllare ancora
@@ -123,7 +143,7 @@ export default class App extends PureComponent {
         inversionTrue = true
       }
 
-      if (el.y <= 50) this.setState({ winner: 2 })
+      if (el.y <= 50) this.setState({ winner: 2, explosion: [playerXPosition, 0] })
     })
 
     return clonedAliens
@@ -131,7 +151,11 @@ export default class App extends PureComponent {
 
 
   renderFrame() {
-    const { direction, down } = this.state
+    const { direction, down, aliens: stateAliens } = this.state
+
+    // A volte a partita terminata, con 0 alieni, c'è ancora una chiamata a renderFrame, che fa crashare tutto
+    if (!stateAliens.length) return
+
     const dX = down ? 0 : options.aliensHorStep * direction
     const dY = down ? options.aliensVerStep : 0
 
@@ -219,7 +243,7 @@ export default class App extends PureComponent {
 
 
   render() {
-    const { score, highest, rockets, aliens, explosion, playerXPosition, lives } = this.state
+    const { score, highest, rockets, aliens, explosion, playerXPosition, lives, winner } = this.state
 
     return (
       <GameView
@@ -239,6 +263,7 @@ export default class App extends PureComponent {
         updatePlayerPosition={this.updatePlayerPosition}
         lives={lives}
         updateLives={this.updateLives}
+        winner={winner}
       />
     )
   }

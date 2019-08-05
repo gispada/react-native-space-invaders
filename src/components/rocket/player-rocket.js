@@ -49,14 +49,18 @@ export default class PlayerRocket extends PureComponent {
 
         // position è relativo, parte da 0 rispetto alla posizione di spawn del missile; bisogna compensare
         const rocketYPosition = position + rocketData.y
+        const firstAlien = aliens[0]
         const lastAlien = aliens[aliens.length - 1]
+
+        // Se il missile non è ancora arrivato agli alieni, salta i controlli
+        if (rocketYPosition < firstAlien.y - 10) return
 
         // Se il missile supera l'ultimo alieno senza colpire, non serve più controllare le collisioni
         if (rocketYPosition > lastAlien.y + 40) {
             translateY.removeListener(this.rocketListener)
             return
         }
-
+        
         for (let i = 0; i < aliens.length; i++) {
             /*
              *    1___y2___

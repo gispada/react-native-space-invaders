@@ -1,24 +1,23 @@
-import React from 'react'
+import React, { PureComponent } from 'react'
 import { View, StyleSheet } from 'react-native'
 import Score from '../score'
 
-const Scores = props => {
-    
-    const { score, highest } = props
+export default class Scores extends PureComponent {
+    render() {
+        const { score, highest, style } = this.props
 
-    return (
-        <View style={styles.base}>
-            <Score label='score' points={score}/>
-            <Score label='hi-score' points={highest}/>
-        </View>
-    )
+        return (
+            <View style={[styles.base, { ...style }]}>
+                <Score label='score' points={score} />
+                <Score label='hi-score' points={highest} />
+            </View>
+        )
+    }
 }
 
 const styles = StyleSheet.create({
     base: {
         flexDirection: 'row',
-        justifyContent: 'space-around'
+        justifyContent: 'space-between'
     }
 })
-
-export default Scores

@@ -2,16 +2,24 @@ import React, { PureComponent } from 'react'
 import { View, StyleSheet, Animated, Easing } from 'react-native'
 import options from '../../config'
 
-export default class Rocket extends PureComponent {
+export default class PlayerRocket extends PureComponent {
+    /*
+     * Il giocatore spara verso l'alto, la posizione del razzo è ricavata a partire dal valore di translateY
+     * Posizione di partenza: valore da bottom (compensato con altezza del cannone)
+     * Movimento: translate negativo verso l'alto, come se fosse bottom: +x
+     * Posizione alieni: valore da bottom
+     * CollisioneY: quando razzoY > alienoY1 e razzoY < alienoY2
+     */
+
     state = {
         translateY: new Animated.Value(0),
         // x statica, qui per evitare di assegnarla a una costante nelle varie iterazioni del for di checkCollision
-        xPosition: this.props.source.x + 22
+        xPosition: this.props.rocketData.x + 22
     }
 
     componentDidMount() {
         const { translateY } = this.state
-        const { limit, animationEnded } = this.props
+        const { limit, removeRocket, rocketData } = this.props
 
         //console.log('Rocket mounted')
 
@@ -28,7 +36,7 @@ export default class Rocket extends PureComponent {
                 duration: options.rocketSpeed,
                 useNativeDriver: true
             }
-        ).start(() => animationEnded())
+        ).start(() => removeRocket(rocketData.id)) // A fine animazione, rimuove il razzo
     }
 
     componentWillUnmount() {
@@ -37,10 +45,10 @@ export default class Rocket extends PureComponent {
 
     checkCollisions(position) {
         const { translateY, xPosition: rocketXPosition } = this.state
-        const { aliens, source, updateScore, removeAlien } = this.props
+        const { aliens, rocketData, updateScore, removeAlien } = this.props
 
         // position è relativo, parte da 0 rispetto alla posizione di spawn del missile; bisogna compensare
-        const rocketYPosition = position + source.y
+        const rocketYPosition = position + rocketData.y
         const lastAlien = aliens[aliens.length - 1]
 
         // Se il missile supera l'ultimo alieno senza colpire, non serve più controllare le collisioni
@@ -50,7 +58,6 @@ export default class Rocket extends PureComponent {
         }
 
         for (let i = 0; i < aliens.length; i++) {
-            if (aliens[i].inactive) continue // Se è già morto, non controlla le collisioni
             /*
              *    1___y2___
              *    |        |
@@ -78,8 +85,8 @@ export default class Rocket extends PureComponent {
 
     render() {
         const { translateY } = this.state
-        const { source } = this.props
-        const animatedStyle = { transform: [{ translateY }], bottom: source.y, left: source.x + 22 }
+        const { rocketData } = this.props
+        const animatedStyle = { transform: [{ translateY }], bottom: rocketData.y, left: rocketData.x + 22 }
 
         return <Animated.View style={[styles.base, animatedStyle]} />
     }

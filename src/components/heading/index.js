@@ -2,18 +2,25 @@ import React, { PureComponent } from 'react'
 import { Text, StyleSheet, Platform } from 'react-native'
 
 export default class Heading extends PureComponent {
+    static defaultProps = {
+        color: '#fdfdfd'
+    }
+    
     render() {
-        const { children } = this.props
+        const { children, color, style, upperCase } = this.props
 
-        return <Text style={styles.base}>{children}</Text>
+        const allStyles = [
+            styles.base,
+            { color, textTransform: upperCase ? 'uppercase' : 'none', ...style }
+        ]
+
+        return <Text style={allStyles}>{children}</Text>
     }
 }
 
 const styles = StyleSheet.create({
     base: {
         fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
-        color: '#fdfdfd',
-        textTransform: 'uppercase',
         fontSize: 18
     }
 })

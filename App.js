@@ -8,15 +8,16 @@ const { width, height } = Dimensions.get('window')
 export default class App extends PureComponent {
   state = {
     winner: 0, // 0: nessuno, 1: giocatore, 2: computer
-    speed: options.defaultSpeed,
-    score: 0,
-    highest: 0,
-    fire: false,
-    source: {},
+    speed: options.startingGameSpeed,
+    playerXPosition: width / 2,
+    lives: options.numberOfLives,
     aliens: [],
-    explosion: [],
     direction: 1,
-    down: false
+    down: false,
+    rockets: [],
+    explosion: [],
+    score: 0,
+    highest: 0
   }
 
 
@@ -29,7 +30,7 @@ export default class App extends PureComponent {
     const { winner, aliens } = this.state
 
     // Un alieno in meno, aumentare la velocità
-    if (prevState.aliens.length !== 0 && prevState.aliens.length !== aliens.length) {
+    if (!prevState.aliens.length && prevState.aliens.length !== aliens.length) {
       clearInterval(this.run)
       // Velocità aumenta di x% rispetto al suo ultimo valore
       const newSpeed = (prevState.speed - (prevState.speed * options.speedMultiplier)).toFixed(0)
@@ -46,46 +47,27 @@ export default class App extends PureComponent {
 
   initGame() {
     this.generateAliens()
+    if (this.run) clearInterval(this.run)
     this.run = setInterval(() => this.renderFrame(), this.state.speed)
-    //this.intervalTimeout = setTimeout(() => this.dynamicInterval(), this.state.speed)
-  }
-
-
-  dynamicInterval() {
-    const { speed, winner } = this.state
-
-    if (winner) return
-    if (this.intervalTimeout) clearTimeout(this.intervalTimeout)
-
-    this.renderFrame()
-    this.intervalTimeout = setTimeout(() => this.dynamicInterval(), speed)
   }
 
 
   victory() {
     alert('HAI VINTO')
-    //clearTimeout(this.intervalTimeout)
     clearInterval(this.run)
   }
 
 
   gameOver() {
     const { score, highest } = this.state
-    //clearTimeout(this.intervalTimeout)
     clearInterval(this.run)
     alert('Game over')
     this.setState({ highest: Math.max(score, highest) })
   }
 
 
-  cloneAliens(source) {
-    const destination = []
-    source.map(el => {
-      //destination.push({ ...el })
-      destination.push(Object.assign({}, el))
-    })
-    return destination
-  }
+  // Per clonare array composti da oggetti [{...}, {...}, {...}]
+  cloneState = source => source.map(el => Object.assign({}, el))
 
 
   generateAliens() {
@@ -126,7 +108,7 @@ export default class App extends PureComponent {
     // Resetta lo stato down, di default gli alieni non devono scendere
     this.setState({ down: false })
 
-    const clonedAliens = this.cloneAliens(aliens)
+    const clonedAliens = this.cloneState(aliens)
 
     clonedAliens.forEach(el => {
       el.x += dX
@@ -155,6 +137,12 @@ export default class App extends PureComponent {
 
     const aliens = this.moveAliens(dX, dY)
 
+    const doesShoot = Math.random() < options.shootingProbability
+    if (doesShoot) {
+      const randomAlien = aliens[Math.floor(Math.random() * aliens.length)]
+      this.fire({ x: randomAlien.x, y: randomAlien.y }, 2)
+    }
+
     // Ritorna un nuovo array degli alieni, come FRAME FINALE
     this.setState({ aliens })
   }
@@ -166,7 +154,7 @@ export default class App extends PureComponent {
   removeAlien = id => {
     const { aliens } = this.state
 
-    const clonedAliens = this.cloneAliens(aliens)
+    const clonedAliens = this.cloneState(aliens)
 
     const killedAlienInd = clonedAliens.findIndex(el => el.id === id)
     const killedAlienType = clonedAliens[killedAlienInd].t
@@ -189,32 +177,68 @@ export default class App extends PureComponent {
   }
 
 
-  fire = source => this.setState({ fire: true, source })
+  fire = (launchPos, player = 1) => {
+    // Razzi diversi per giocatore, serve sapere chi ha sparato
+    const { rockets: stateRockets } = this.state
+
+    if (stateRockets.length === options.maxRocketsOnScreen) return
+
+    const id = Math.random().toString(36).substring(2, 8)
+
+    const rockets = [
+      ...stateRockets,
+      { id, player, ...launchPos }
+    ]
+
+    this.setState({ rockets })
+  }
 
 
-  animationEnded = () => this.setState({ fire: false })
+  removeRocket = id => {
+    const { rockets: stateRockets } = this.state
 
+    const rockets = this.cloneState(stateRockets)
+    const rocketInd = rockets.findIndex(el => el.id === id)
+
+    rockets.splice(rocketInd, 1)
+
+    this.setState({ rockets })
+  }
+
+
+  updatePlayerPosition = value => this.setState({ playerXPosition: value })
+
+  updateLives = () => {
+    this.setState(prevState => {
+      const lives = prevState.lives - 1
+      return lives === 0 ? { lives, winner: 2 } : { lives }
+    })
+  }
 
   clearExplosion = () => this.setState({ explosion: [] })
 
+
   render() {
-    const { score, highest, source, fire, aliens, explosion } = this.state
+    const { score, highest, rockets, aliens, explosion, playerXPosition, lives } = this.state
 
     return (
       <GameView
         width={width} // screen width
         height={height} // screen height
         score={score}
+        updateScore={this.updateScore}
         highest={highest}
         fire={this.fire}
+        rockets={rockets}
+        removeRocket={this.removeRocket}
         aliens={aliens}
-        fireStatus={fire}
-        source={source}
-        animationEnded={this.animationEnded}
-        updateScore={this.updateScore}
         removeAlien={this.removeAlien}
         explosion={explosion}
         clearExplosion={this.clearExplosion}
+        playerXPosition={playerXPosition}
+        updatePlayerPosition={this.updatePlayerPosition}
+        lives={lives}
+        updateLives={this.updateLives}
       />
     )
   }

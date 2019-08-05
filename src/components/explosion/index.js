@@ -1,11 +1,16 @@
 import React, { PureComponent } from 'react'
 import Sprite from '../sprite'
+import options from '../../config'
 
 export default class Explosion extends PureComponent {
 
     componentDidMount() {
-        const { onEnd } = this.props
-        setTimeout(() => { onEnd() }, 400)
+        const { onAnimationEnd } = this.props
+        this.explosion = setTimeout(() => { onAnimationEnd() }, options.explosionDuration)
+    }
+
+    componentWillUnmount() {
+        clearTimeout(this.explosion)
     }
 
     render() {
@@ -14,7 +19,7 @@ export default class Explosion extends PureComponent {
         return (
             <Sprite
                 image={`explosion${variant}`}
-                style={{position: 'absolute', left: position[0], bottom: position[1]}}
+                style={{ position: 'absolute', left: position[0], bottom: position[1] }}
             />
         )
     }

@@ -39,6 +39,7 @@ export default class ControlsArea extends PureComponent {
             // A fine scrolling, aggiunge l'offset al valore finale e lo reimposta a 0
             onPanResponderRelease: (e, gestureState) => {
                 this.state.translateX.flattenOffset()
+                this.props.updatePlayerPosition(gestureState.moveX-25)
             }
 
         })
@@ -57,7 +58,7 @@ export default class ControlsArea extends PureComponent {
 
     render() {
         const { translateX } = this.state
-        const { children, height } = this.props
+        const { height } = this.props
 
         console.log('Controls rendered')
 
@@ -97,7 +98,8 @@ const styles = StyleSheet.create({
         justifyContent: 'flex-end',
         bottom: 4,
         left: 0,
-        right: 0
+        right: 0,
+        zIndex: 2
     },
     inner: {
         //backgroundColor: 'red',

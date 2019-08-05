@@ -1,17 +1,15 @@
-import React from 'react'
-import { View } from 'react-native'
+import React, { PureComponent } from 'react'
 import Heading from '../heading'
 
-const Score = props => {
-    const { label, points } = props
-    
-    const formatPoints = () => points.toString().padStart(4, '0')
+export default class index extends PureComponent {
+    get formatPoints() {
+        const { points } = this.props
+        return points.toString().padStart(4, '0')
+    }
 
-    return (
-        <View>
-            <Heading>{label}: {formatPoints()}</Heading>
-        </View>
-    )
+    render() {
+        const { label } = this.props
+
+        return <Heading upperCase>{label}: <Heading color='#22cc00'>{this.formatPoints}</Heading></Heading>
+    }
 }
-
-export default Score

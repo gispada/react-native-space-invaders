@@ -57,7 +57,7 @@ export default class GameView extends PureComponent {
 
                     {this.renderRockets()}
 
-                    <Controls winner={winner} fire={fire} width={width} height={height} updatePlayerPosition={updatePlayerPosition} />
+                    {winner !== 2 && <Controls fire={fire} width={width} height={height} updatePlayerPosition={updatePlayerPosition} />}
 
                 </View>
 

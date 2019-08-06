@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react'
-import { View, StatusBar, StyleSheet, SafeAreaView } from 'react-native'
-import ControlsArea from '../controls-area'
+import { View, StatusBar, StyleSheet, SafeAreaView, Platform } from 'react-native'
+import Controls from '../controls/index2'
 import AliensGrid from '../aliens-grid'
 import PlayerRocket from '../rocket/player-rocket'
 import AlienRocket from '../rocket/alien-rocket'
@@ -57,7 +57,7 @@ export default class GameView extends PureComponent {
 
                     {this.renderRockets()}
 
-                    <ControlsArea winner={winner} fire={fire} width={width} height={height} updatePlayerPosition={updatePlayerPosition} />
+                    <Controls winner={winner} fire={fire} width={width} height={height} updatePlayerPosition={updatePlayerPosition} />
 
                 </View>
 
@@ -75,6 +75,7 @@ const styles = StyleSheet.create({
     },
     container: {
         //backgroundColor: 'orangered',
+        paddingTop: Platform.OS === 'ios' ? 4 : 24,
         flex: 1,
         zIndex: 1
     }

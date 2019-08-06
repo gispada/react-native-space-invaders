@@ -3,18 +3,18 @@ import { View, TouchableWithoutFeedback, StyleSheet, PanResponder, Animated } fr
 import Sprite from '../sprite'
 import options from '../../config'
 
-export default class ControlsArea extends PureComponent {
+export default class Controls extends PureComponent {
     constructor(props) {
         super(props)
 
         this.state = {
             width: this.props.width,
             translateX: new Animated.Value(0),
-            position: { x: 0, y: 0 } // TODO Invece di usare ref e measure, prendere la posizione dallo stato
         }
 
         // coolDown qui per evitare il re-render del componente
         this.coolDown = false
+        this.cannonXPosition = this.state.width / 2
 
         this.cannonRef = React.createRef()
 
@@ -30,12 +30,21 @@ export default class ControlsArea extends PureComponent {
 
             // Allo scrolling prende il valore dello spostamento sull'asse X, che sarà usato in un transform
             onPanResponderMove: (e, gestureState) => {
-                if (gestureState.moveX > 25 && gestureState.moveX < (this.state.width - 25)) {
+
+                // Posizione corrente del cannone (il suo centro)
+                this.cannonRef.current.measure((x, y, elWidth, elHeight, posX, posY) => {
+                    this.cannonXPosition = posX
+                })
+
+                //console.log(this.cannonXPosition)
+                if (this.cannonXPosition > 25 && this.cannonXPosition < (this.state.width - 25)) {
                     this.state.translateX.setValue(gestureState.dx)
                 } else {
-                    // Se va fuori schermo, imposta un dX più o meno pari a metà cannone per riportarlo dentro
-                    const safeDx = gestureState.dx + (gestureState.dx < 0 ? 25 : -25)
+                    //Se va fuori schermo, imposta un dX più o meno pari a metà cannone per riportarlo dentro
+                    //const safeDx = gestureState.dx + (gestureState.dx < 0 ? 25 : -25)
+                    const safeDx = gestureState.dx + (gestureState.dx < 0 ? -25 : -25)
                     this.state.translateX.setValue(safeDx)
+                    
                 }
                 //const boundaries = this._calcBoundaries(e.nativeEvent.locationX)
             },
@@ -43,23 +52,23 @@ export default class ControlsArea extends PureComponent {
             // A fine scrolling, aggiunge l'offset al valore finale e lo reimposta a 0
             onPanResponderRelease: (e, gestureState) => {
                 this.state.translateX.flattenOffset()
-                this.props.updatePlayerPosition(gestureState.moveX - 25)
+                this.props.updatePlayerPosition(this.cannonXPosition)
             }
 
         })
     }
 
+
     afire = () => {
         const { fire, height } = this.props
 
         // Passa a fire() la posizione del cannone, per sincronizzare il proiettile
-        this.cannonRef.current.measure((x, y, elWidth, elHeight, pageX, pageY) => {
-            if (!this.coolDown) {
-                fire({ x: pageX, y: height - pageY })
-                this.coolDown = true
-                setTimeout(() => this.coolDown = false, options.rocketCoolDown)
-            }
-        })
+        if (!this.coolDown) {
+            fire({ x: this.cannonXPosition, y: 50 })
+            this.coolDown = true
+            setTimeout(() => this.coolDown = false, options.rocketCoolDown)
+        }
+
     }
 
     render() {
@@ -69,20 +78,17 @@ export default class ControlsArea extends PureComponent {
         console.log('Controls rendered')
 
         // Il dx è passato a transform, per traslare la View del valore dx
-        const viewStyle = { transform: [{ translateX }] }
+        const animatedStyle = { transform: [{ translateX }] }
 
         return (
-            <View style={[styles.outer, { height: height / 2 }]}>
+            <View style={[styles.outer, { height: height / 2 }]} {...this._panResponder.panHandlers}>
 
-                {/* Area in cui è possibile sparare al touch */}
-                <TouchableWithoutFeedback onPress={this.afire}>
-                    <View style={{ flex: 1 }} />
-                </TouchableWithoutFeedback>
-
-                {/* Area in cui muovere il cannone; qui solo un touch sul cannone spara */}
                 <View style={styles.inner}>
 
-                    <Animated.View style={viewStyle} {...this._panResponder.panHandlers}>
+                    <Animated.View
+                        style={animatedStyle}
+                    //onLayout={({nativeEvent}) => this.cannonXPosition = nativeEvent.layout.x}
+                    >
                         <TouchableWithoutFeedback onPress={this.afire}>
                             <View ref={this.cannonRef}>
                                 {winner !== 2 && <Sprite image='cannon' />}

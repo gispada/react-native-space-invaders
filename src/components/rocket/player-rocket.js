@@ -29,7 +29,7 @@ export default class PlayerRocket extends PureComponent {
             this.state.translateY,
             {
                 toValue: -limit,
-                easing: Easing.linear(),
+                easing: Easing.linear,
                 duration: options.rocketSpeed,
                 useNativeDriver: true
             }

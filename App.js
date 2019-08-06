@@ -77,18 +77,23 @@ export default class App extends PureComponent {
 
     clearInterval(this.gameLoop)
     this.setState({ highest: Math.max(score, highest), explosion: [playerXPosition, 0] })
-    
-    Alert.alert('GAME OVER', 'Gli alieni hanno vinto!', [
-      { text: 'Esci', onPress: () => console.log('Esci'), style: 'cancel' },
-      { text: 'Nuova partita', onPress: () => this.initGame() }
-    ])
+
+    Alert.alert(
+      'GAME OVER',
+      'Gli alieni hanno vinto!',
+      [
+        { text: 'Esci', onPress: () => console.log('Esci'), style: 'cancel' },
+        { text: 'Nuova partita', onPress: () => this.initGame() }
+      ],
+      { cancelable: false })
   }
 
 
   increaseSpeed(startingSpeed) {
     clearInterval(this.gameLoop)
     // Velocità aumenta di x% rispetto al suo ultimo valore
-    const newSpeed = (startingSpeed - (startingSpeed * options.speedMultiplier)).toFixed(0)
+    // newSpeed diventa una stringa, crash su Android, ok su IOS (?)
+    const newSpeed = +(startingSpeed - (startingSpeed * options.speedMultiplier)).toFixed(0)
     this.setState({ speed: newSpeed }, () => {
       this.gameLoop = setInterval(() => this.renderFrame(), newSpeed)
     })

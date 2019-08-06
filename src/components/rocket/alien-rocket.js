@@ -30,7 +30,7 @@ export default class AlienRocket extends PureComponent {
             {
                 // Quanto translate usare per arrivare giù, dipende dalla posizione iniziale del razzo
                 toValue: limit - (limit - rocketData.y),
-                easing: Easing.linear(),
+                easing: Easing.linear,
                 // Durata minore al discendere degli alieni, perché il missile ha meno spazio da percorrere
                 duration: options.rocketSpeed * Math.sqrt(rocketData.y / limit),
                 useNativeDriver: true

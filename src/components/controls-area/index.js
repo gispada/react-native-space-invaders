@@ -1,6 +1,7 @@
 import React, { PureComponent } from 'react'
-import { View, TouchableWithoutFeedback, StyleSheet, Dimensions, PanResponder, Animated } from 'react-native'
-import Sprite from '../sprite';
+import { View, TouchableWithoutFeedback, StyleSheet, PanResponder, Animated } from 'react-native'
+import Sprite from '../sprite'
+import options from '../../config'
 
 export default class ControlsArea extends PureComponent {
     constructor(props) {
@@ -11,6 +12,9 @@ export default class ControlsArea extends PureComponent {
             translateX: new Animated.Value(0),
             position: { x: 0, y: 0 } // TODO Invece di usare ref e measure, prendere la posizione dallo stato
         }
+
+        // coolDown qui per evitare il re-render del componente
+        this.coolDown = false
 
         this.cannonRef = React.createRef()
 
@@ -39,20 +43,22 @@ export default class ControlsArea extends PureComponent {
             // A fine scrolling, aggiunge l'offset al valore finale e lo reimposta a 0
             onPanResponderRelease: (e, gestureState) => {
                 this.state.translateX.flattenOffset()
-                this.props.updatePlayerPosition(gestureState.moveX-25)
+                this.props.updatePlayerPosition(gestureState.moveX - 25)
             }
 
         })
     }
 
-    // TODO eliminare
     afire = () => {
         const { fire, height } = this.props
-        //console.log(this.cannonRef.current)
 
         // Passa a fire() la posizione del cannone, per sincronizzare il proiettile
         this.cannonRef.current.measure((x, y, elWidth, elHeight, pageX, pageY) => {
-            fire({ x: pageX, y: height - pageY })
+            if (!this.coolDown) {
+                fire({ x: pageX, y: height - pageY })
+                this.coolDown = true
+                setTimeout(() => this.coolDown = false, options.rocketCoolDown)
+            }
         })
     }
 
@@ -79,7 +85,7 @@ export default class ControlsArea extends PureComponent {
                     <Animated.View style={viewStyle} {...this._panResponder.panHandlers}>
                         <TouchableWithoutFeedback onPress={this.afire}>
                             <View ref={this.cannonRef}>
-                                {winner !== 2 && <Sprite image='cannon'/>}
+                                {winner !== 2 && <Sprite image='cannon' />}
                             </View>
                         </TouchableWithoutFeedback>
                     </Animated.View>

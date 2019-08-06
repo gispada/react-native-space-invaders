@@ -1,8 +1,8 @@
 import React, { PureComponent } from 'react'
 import Heading from '../heading'
 
-export default class index extends PureComponent {
-    get formatPoints() {
+export default class Score extends PureComponent {
+    get formattedPoints() {
         const { points } = this.props
         return points.toString().padStart(4, '0')
     }
@@ -10,6 +10,6 @@ export default class index extends PureComponent {
     render() {
         const { label } = this.props
 
-        return <Heading upperCase>{label}: <Heading color='#22cc00'>{this.formatPoints}</Heading></Heading>
+        return <Heading upperCase>{label}: <Heading color='#22cc00'>{this.formattedPoints}</Heading></Heading>
     }
 }

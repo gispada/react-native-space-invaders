@@ -3,7 +3,7 @@ import { View, StyleSheet } from 'react-native'
 import Sprite from '../sprite'
 
 export default class Lives extends PureComponent {
-    get renderLives() {
+    renderLives() {
         const { number } = this.props
         
         // Se arriva un razzo a 0 vite, fa crashare tutto
@@ -17,7 +17,7 @@ export default class Lives extends PureComponent {
     render() {
         return (
             <View style={styles.base}>
-                {this.renderLives}
+                {this.renderLives()}
             </View>
         )
     }

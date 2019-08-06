@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react'
-import { Text, View, StyleSheet } from 'react-native'
+import { StyleSheet } from 'react-native'
 import Alien from '../alien'
 
 export default class AliensGrid extends PureComponent {
@@ -10,28 +10,22 @@ export default class AliensGrid extends PureComponent {
     componentDidUpdate(prevProps, prevState) {
         // Non cambia il variant se un alieno è stato eliminato
         if (prevProps.config.length === this.props.config.length) {
-            this.setState({variant: prevState.variant === 2 ? 1 : 2})
+            this.setState({ variant: prevState.variant === 2 ? 1 : 2 })
         }
     }
 
-    get renderAliens() {
+    renderAliens() {
         const { variant } = this.state
-        const { config, width, height } = this.props
+        const { config } = this.props
 
         return config.map((el, ind) => (
-            <Alien
-                key={el.id}
-                type={el.t}
-                variant={variant}
-                left={el.x}
-                bottom={el.y}
-                id={el.id}
-                inactive={el.inactive}
-            />
+            <Alien key={el.id} id={el.id} type={el.t} variant={variant} left={el.x} bottom={el.y} />
         ))
     }
 
-    render = () => this.renderAliens
+    render() {
+        return this.renderAliens()
+    }
 }
 
 const styles = StyleSheet.create({

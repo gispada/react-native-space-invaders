@@ -5,6 +5,7 @@ const options = {
     startingGameSpeed: 1000,
     speedMultiplier: 0.08,
     rocketSpeed: 1600,
+    rocketCoolDown: 800, // Intervallo di tempo tra un missile e l'altro
     explosionDuration: 400,
 
     aliensInit: [5, 5, 5], // 3 file, ciascuna con 5 alieni; l'index + 1 è il tipo di alieno

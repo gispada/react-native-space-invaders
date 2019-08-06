@@ -18,7 +18,7 @@ export default class Sprite extends PureComponent {
         width: 50
     }
 
-    get getSprite() {
+    get image() {
         const { image } = this.props
         return sprites[`${image}`]
     }
@@ -29,6 +29,6 @@ export default class Sprite extends PureComponent {
         // Auto height
         //const source = Image.resolveAssetSource(img)
         //const height = width / (source.width / source.height)
-        return <Image source={this.getSprite} style={{width, height: width, tintColor, ...style}}/>
+        return <Image source={this.image} style={{width, height: width, tintColor, ...style}}/>
     }
 }

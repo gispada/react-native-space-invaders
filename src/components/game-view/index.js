@@ -10,7 +10,7 @@ import UpperBar from '../upper-bar'
 
 export default class GameView extends PureComponent {
 
-    get renderRockets() {
+    renderRockets() {
         const { rockets, aliens, height, removeAlien, removeRocket, updateScore, playerXPosition, updateLives } = this.props
 
         return rockets.map(el => (
@@ -52,9 +52,10 @@ export default class GameView extends PureComponent {
                             variant={explosion[1] === 0 ? '2' : '1'} // Solo il cannone ha y = 0
                             position={explosion}
                             onAnimationEnd={clearExplosion}
-                        />}
+                        />
+                    }
 
-                    {this.renderRockets}
+                    {this.renderRockets()}
 
                     <ControlsArea winner={winner} fire={fire} width={width} height={height} updatePlayerPosition={updatePlayerPosition} />
 

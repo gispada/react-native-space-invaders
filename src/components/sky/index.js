@@ -5,7 +5,7 @@ import options from '../../config'
 
 export default class Sky extends PureComponent {
 
-    get renderStars() {
+    renderStars() {
         const { width, height } = this.props
 
         return Array(options.numberOfStars).fill(0).map((el, id) => {
@@ -27,7 +27,7 @@ export default class Sky extends PureComponent {
 
         return (
             <View style={styles.base}>
-                {this.renderStars}
+                {this.renderStars()}
             </View>
         )
     }

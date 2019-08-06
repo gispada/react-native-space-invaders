@@ -7,42 +7,19 @@ export default class Alien extends PureComponent {
         width: 40
     }
 
-    state = {
-        exploded: false
-    }
-
-    componentDidUpdate(prevProps, prevState) {
-        // Solo quando un alieno diventa inattivo...
-        if (prevProps.inactive !== this.props.inactive) {
-            this.explosionTimeout = setTimeout(() => {
-                this.setState(
-                    { exploded: true }, // ...dopo x secondi l'esplosione sparisce...
-                    () => clearTimeout(this.explosionTimeout) // ...e a quel punto, distrugge il timeout
-                )
-            }, 600)
-        }
-    }
-
-    get getAlienType() {
+    get type() {
         const { type, variant } = this.props
         return `alien${type}_${variant}`
     }
 
-    get explode() {
-        const { exploded } = this.state
-        const { width } = this.props
-        // Se è già esploso, niente
-        return exploded ? null : <Sprite image='explosion1' width={width} />
-    }
-
     render() {
-        const { width, left, bottom, inactive } = this.props
+        const { width, left, bottom } = this.props
 
         const dynamicStyles = [styles.base, { left, bottom }]
 
         return (
             <View style={dynamicStyles}>
-                {inactive ? this.explode : <Sprite image={this.getAlienType} width={width} />}
+                <Sprite image={this.type} width={width} />
             </View>
         )
     }

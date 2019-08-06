@@ -32,10 +32,7 @@ export default class App extends PureComponent {
     // Un alieno in meno, aumentare la velocità
     // Non deve essere chiamato all'init (quando prima c'era un vincitore) o non resetta la velocità!
     if (!prevState.winner && !!prevState.aliens.length && prevState.aliens.length !== aliens.length) {
-      clearInterval(this.run)
-      // Velocità aumenta di x% rispetto al suo ultimo valore
-      const newSpeed = (prevState.speed - (prevState.speed * options.speedMultiplier)).toFixed(0)
-      this.setState({ speed: newSpeed }, () => this.run = setInterval(() => this.renderFrame(), newSpeed))
+      this.increaseSpeed(prevState.speed)
     }
 
     // C'è un vincitore
@@ -50,14 +47,14 @@ export default class App extends PureComponent {
     const { winner } = this.state
 
     if (this.delay) clearTimeout(this.delay)
-    if (winner) this.initializeState()
+    if (winner) this.reinitState()
 
     this.generateAliens()
-    this.run = setInterval(() => this.renderFrame(), this.state.speed)
+    this.gameLoop = setInterval(() => this.renderFrame(), this.state.speed)
   }
 
 
-  initializeState() {
+  reinitState() {
     const common = {
       winner: 0,
       speed: options.startingGameSpeed,
@@ -65,24 +62,36 @@ export default class App extends PureComponent {
       down: false
     }
     this.setState(this.state.winner === 1 ? { ...common } : { ...common, lives: options.numberOfLives, aliens: [], score: 0 })
-    if (this.run) clearInterval(this.run)
+    if (this.gameLoop) clearInterval(this.gameLoop)
   }
 
 
   victory() {
-    clearInterval(this.run)
+    clearInterval(this.gameLoop)
     this.delay = setTimeout(() => this.initGame(), 500)
   }
 
 
   gameOver() {
     const { score, highest, playerXPosition } = this.state
-    clearInterval(this.run)
+
+    clearInterval(this.gameLoop)
     this.setState({ highest: Math.max(score, highest), explosion: [playerXPosition, 0] })
+    
     Alert.alert('GAME OVER', 'Gli alieni hanno vinto!', [
       { text: 'Esci', onPress: () => console.log('Esci'), style: 'cancel' },
       { text: 'Nuova partita', onPress: () => this.initGame() }
     ])
+  }
+
+
+  increaseSpeed(startingSpeed) {
+    clearInterval(this.gameLoop)
+    // Velocità aumenta di x% rispetto al suo ultimo valore
+    const newSpeed = (startingSpeed - (startingSpeed * options.speedMultiplier)).toFixed(0)
+    this.setState({ speed: newSpeed }, () => {
+      this.gameLoop = setInterval(() => this.renderFrame(), newSpeed)
+    })
   }
 
 
@@ -100,14 +109,13 @@ export default class App extends PureComponent {
       for (let i = 0; i < el; i++) {
         const type = ind + 1
         const num = i + 1
-        // Un alieno è { id: 't1n1', t: 1, x: 120, y: 40, inactive: false }
+        // Un alieno è { id: 't1n1', t: 1, x: 120, y: 40 }
         aliens.push(
           {
             id: `t${type}n${num}`,
             t: type,
             x: xOffset + (options.aliensHorSpace * i),
-            y: height - (options.aliensVerSpace * (ind + 1)) - yOffset,
-            inactive: false
+            y: height - (options.aliensVerSpace * (ind + 1)) - yOffset
           }
         )
       }
@@ -172,9 +180,6 @@ export default class App extends PureComponent {
   }
 
 
-  updateScore = () => this.setState(prevState => ({ score: prevState.score + 1 }))
-
-
   removeAlien = id => {
     const { aliens } = this.state
 
@@ -230,7 +235,11 @@ export default class App extends PureComponent {
   }
 
 
+  updateScore = () => this.setState(prevState => ({ score: prevState.score + 1 }))
+
+
   updatePlayerPosition = value => this.setState({ playerXPosition: value })
+
 
   updateLives = () => {
     this.setState(prevState => {
@@ -238,6 +247,7 @@ export default class App extends PureComponent {
       return lives === 0 ? { lives, winner: 2 } : { lives }
     })
   }
+
 
   clearExplosion = () => this.setState({ explosion: [] })
 

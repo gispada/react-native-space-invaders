@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react'
-import { View, StyleSheet, Animated, Easing } from 'react-native'
+import { StyleSheet, Animated, Easing } from 'react-native'
 import options from '../../config'
 
 export default class PlayerRocket extends PureComponent {
@@ -21,10 +21,7 @@ export default class PlayerRocket extends PureComponent {
         const { translateY } = this.state
         const { limit, removeRocket, rocketData } = this.props
 
-        //console.log('Rocket mounted')
-
         this.rocketListener = translateY.addListener(({ value }) => {
-            //console.log(value)
             this.checkCollisions(Math.abs(value))
         })
 
@@ -39,13 +36,15 @@ export default class PlayerRocket extends PureComponent {
         ).start(() => removeRocket(rocketData.id)) // A fine animazione, rimuove il razzo
     }
 
-    componentWillUnmount() {
-        //console.log('Rocket unmounted')
-    }
-
     checkCollisions(position) {
         const { translateY, xPosition: rocketXPosition } = this.state
         const { aliens, rocketData, updateScore, removeAlien } = this.props
+
+        // A fine partita, con alieni a 0, se c'è ancora un missile su schermo, disattivare il controllo
+        if (!aliens.length) {
+            translateY.removeListener(this.rocketListener)
+            return
+        }
 
         // position è relativo, parte da 0 rispetto alla posizione di spawn del missile; bisogna compensare
         const rocketYPosition = position + rocketData.y
@@ -77,7 +76,6 @@ export default class PlayerRocket extends PureComponent {
             // COLPITO!
             // Controlla se il missile è dentro l'hit box dell'alieno (Y1 < missile < Y2 e X1 < missile < X2)
             if (rocketYPosition > y1Threshold && rocketYPosition < y2Threshold && rocketXPosition > x1Threshold && rocketXPosition < x2Threshold) {
-                //alert ('HIT' + aliens[i].id)
                 translateY.removeListener(this.rocketListener)
                 translateY.stopAnimation()
                 removeAlien(aliens[i].id)

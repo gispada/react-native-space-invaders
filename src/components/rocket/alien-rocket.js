@@ -21,8 +21,6 @@ export default class AlienRocket extends PureComponent {
         const { translateY } = this.state
         const { limit, removeRocket, rocketData } = this.props
 
-        //console.log('Rocket mounted')
-
         this.rocketListener = translateY.addListener(({ value }) => {
             this.checkCollisions(Math.abs(value))
         })
@@ -33,14 +31,11 @@ export default class AlienRocket extends PureComponent {
                 // Quanto translate usare per arrivare giù, dipende dalla posizione iniziale del razzo
                 toValue: limit - (limit - rocketData.y),
                 easing: Easing.linear(),
-                duration: options.rocketSpeed,
+                // Durata minore al discendere degli alieni, perché il missile ha meno spazio da percorrere
+                duration: options.rocketSpeed * Math.sqrt(rocketData.y / limit),
                 useNativeDriver: true
             }
         ).start(() => removeRocket(rocketData.id)) // A fine animazione, rimuove il razzo
-    }
-
-    componentWillUnmount() {
-        //console.log('Rocket unmounted')
     }
 
     checkCollisions(position) {
@@ -66,7 +61,6 @@ export default class AlienRocket extends PureComponent {
             updateLives()
         }
     }
-
 
     render() {
         const { translateY } = this.state

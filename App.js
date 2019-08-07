@@ -9,8 +9,8 @@ export default class App extends PureComponent {
   state = {
     winner: 0, // 0: nessuno, 1: giocatore, 2: computer
     speed: options.startingGameSpeed,
-    playerXPosition: width / 2,
-    lives: 3,
+    playerXPosition: 0,
+    lives: options.numberOfLives,
     aliens: [],
     direction: 1,
     down: false,
@@ -66,6 +66,11 @@ export default class App extends PureComponent {
   }
 
 
+  exit() {
+    console.log('Exit')
+  }
+
+
   victory() {
     clearInterval(this.gameLoop)
     this.delay = setTimeout(() => this.initGame(), 500)
@@ -82,7 +87,7 @@ export default class App extends PureComponent {
       'GAME OVER',
       'Gli alieni hanno vinto!',
       [
-        { text: 'Esci', onPress: () => console.log('Esci'), style: 'cancel' },
+        { text: 'Esci', onPress: () => this.exit(), style: 'cancel' },
         { text: 'Nuova partita', onPress: () => this.initGame() }
       ],
       { cancelable: false })
@@ -107,8 +112,12 @@ export default class App extends PureComponent {
   generateAliens() {
     const aliens = []
 
-    const xOffset = (width - options.aliensHorSpace * 5) / 2 // per centrare gli alieni
-    const yOffset = 80
+    const alienHorSpace = options.alienSize + options.aliensHorDistance
+    const alienVerSpace = options.alienSize + options.aliensVerDistance
+    
+    const offsetForCentering = options.aliensHorDistance / 2
+    const xOffset = offsetForCentering + (width - alienHorSpace * Math.max(...options.aliensInit)) / 2 // Per centrare gli alieni
+    const yOffset = alienVerSpace + (alienVerSpace * 0.4)
 
     options.aliensInit.map((el, ind) => {
       for (let i = 0; i < el; i++) {
@@ -119,8 +128,8 @@ export default class App extends PureComponent {
           {
             id: `t${type}n${num}`,
             t: type,
-            x: xOffset + (options.aliensHorSpace * i),
-            y: height - (options.aliensVerSpace * (ind + 1)) - yOffset
+            x: xOffset + (alienHorSpace * i),
+            y: height - (alienVerSpace * (ind + 1)) - yOffset
           }
         )
       }
@@ -151,12 +160,12 @@ export default class App extends PureComponent {
 
       // Fuori dallo schermo? Invertire! Controllo solo se gli alieni vanno nella stessa direzione del limite
       // per evitare un bug in renderFrame quando si muovono solo verso il basso
-      if (direction === 1 && el.x + 60 > width || direction === -1 && el.x < 10) {
+      if (direction === 1 && el.x + (options.alienSize + 16) > width || direction === -1 && el.x < 16) {
         this.setState(prevState => ({ direction: prevState.direction *= -1, down: true }))
         inversionTrue = true
       }
 
-      if (el.y <= 50) this.setState({ winner: 2, explosion: [playerXPosition, 0] })
+      if (el.y <= options.cannonSize) this.setState({ winner: 2, explosion: [playerXPosition, 0] })
     })
 
     return clonedAliens
@@ -279,6 +288,7 @@ export default class App extends PureComponent {
         lives={lives}
         updateLives={this.updateLives}
         winner={winner}
+        exit={this.exit}
       />
     )
   }

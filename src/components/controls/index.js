@@ -1,122 +1,123 @@
 import React, { PureComponent } from 'react'
-import { View, TouchableWithoutFeedback, StyleSheet, PanResponder, Animated } from 'react-native'
+import { View, ScrollView, TouchableWithoutFeedback, StyleSheet, Animated, Easing } from 'react-native'
 import Sprite from '../sprite'
 import options from '../../config'
+
+const cannonHalf = options.cannonSize / 2
 
 export default class Controls extends PureComponent {
     constructor(props) {
         super(props)
-
-        this.state = {
-            width: this.props.width,
-            translateX: new Animated.Value(0),
-        }
-
-        // coolDown qui per evitare il re-render del componente
-        this.coolDown = false
-        this.cannonXPosition = this.state.width / 2
-
-        this.cannonRef = React.createRef()
-
-        this._panResponder = PanResponder.create({
-
-            // Il pan responder è attivo, ma risponde solo allo scrolling (?)
-            onMoveShouldSetPanResponder: (e, gestureState) => true,
-
-            // A inizio scrolling imposta un offset per partire dall'ultima posizione, e non dal centro
-            onPanResponderGrant: (e, gestureState) => {
-                this.state.translateX.setOffset(this.state.translateX._value)
-            },
-
-            // Allo scrolling prende il valore dello spostamento sull'asse X, che sarà usato in un transform
-            onPanResponderMove: (e, gestureState) => {
-
-                // Posizione corrente del cannone (il suo centro)
-                this.cannonRef.current.measure((x, y, elWidth, elHeight, posX, posY) => {
-                    this.cannonXPosition = posX
-                })
-
-                //console.log(this.cannonXPosition)
-                if (this.cannonXPosition > 25 && this.cannonXPosition < (this.state.width - 25)) {
-                    this.state.translateX.setValue(gestureState.dx)
-                } else {
-                    //Se va fuori schermo, imposta un dX più o meno pari a metà cannone per riportarlo dentro
-                    //const safeDx = gestureState.dx + (gestureState.dx < 0 ? 25 : -25)
-                    const safeDx = gestureState.dx + (gestureState.dx < 0 ? -25 : -25)
-                    this.state.translateX.setValue(safeDx)
-                    
-                }
-                //const boundaries = this._calcBoundaries(e.nativeEvent.locationX)
-            },
-
-            // A fine scrolling, aggiunge l'offset al valore finale e lo reimposta a 0
-            onPanResponderRelease: (e, gestureState) => {
-                this.state.translateX.flattenOffset()
-                this.props.updatePlayerPosition(this.cannonXPosition)
-            }
-
-        })
+        this.scrollView = React.createRef()
+        this.cannonXPosition = this.props.width / 2
+        this.translateY = new Animated.Value(0)
+        this.opacity = new Animated.Value(1)
     }
 
+    componentDidMount() {
+        const { width } = this.props
+        // Centra il cannone
+        // Senza timeout non chiama scrollTo.. perché?
+        setTimeout(() => this.scrollView.current.scrollTo({ x: width / 2 - cannonHalf, y: 0, animated: false }), 250)
+        Animated.timing(
+            this.translateY,
+            {
+                toValue: -options.cannonSize,
+                easing: Easing.bezier(.04, .38, .18, .93),
+                delay: 200,
+                duration: 600,
+                useNativeDriver: true
+            }
+        ).start()
+    }
 
-    afire = () => {
-        const { fire, height } = this.props
+    componentDidUpdate(prevProps, prevState) {
+        if (this.props.lives > 0 && prevProps.lives !== this.props.lives) {
+            Animated.sequence([
+                Animated.timing(this.opacity, {
+                    toValue: 0.2,
+                    easing: Easing.linear,
+                    duration: 80,
+                    useNativeDriver: true
+                }),
+                Animated.timing(this.opacity, {
+                    toValue: 1,
+                    easing: Easing.linear,
+                    duration: 80,
+                    useNativeDriver: true
+                })
+            ]).start()
+        }
+    }
+
+    fire = () => {
+        const { fire } = this.props
 
         // Passa a fire() la posizione del cannone, per sincronizzare il proiettile
         if (!this.coolDown) {
-            fire({ x: this.cannonXPosition, y: 50 })
+            fire({ x: this.cannonXPosition, y: options.cannonSize })
             this.coolDown = true
             setTimeout(() => this.coolDown = false, options.rocketCoolDown)
         }
 
     }
 
+    calculateCannonPosition(offset) {
+        const { width, updatePlayerPosition } = this.props
+        const currentPosition = (width - options.cannonSize) - offset
+        this.cannonXPosition = currentPosition
+        // Posizione cannone: offset da inizio schermo a sinista fino a lato sinistro della view
+        updatePlayerPosition(this.cannonXPosition)
+    }
+
     render() {
-        const { translateX } = this.state
-        const { height, winner } = this.props
+        const { width, height } = this.props
 
         console.log('Controls rendered')
 
-        // Il dx è passato a transform, per traslare la View del valore dx
-        const animatedStyle = { transform: [{ translateX }] }
+        const animatedStyle = { transform: [{ translateY: this.translateY }] }
+        const touchableArea = [styles.innerView, { width: width * 2 - options.cannonSize }]
 
         return (
-            <View style={[styles.outer, { height: height / 2 }]} {...this._panResponder.panHandlers}>
-
-                <View style={styles.inner}>
-
-                    <Animated.View
-                        style={animatedStyle}
-                    //onLayout={({nativeEvent}) => this.cannonXPosition = nativeEvent.layout.x}
-                    >
-                        <TouchableWithoutFeedback onPress={this.afire}>
-                            <View ref={this.cannonRef}>
-                                {winner !== 2 && <Sprite image='cannon' />}
-                            </View>
-                        </TouchableWithoutFeedback>
-                    </Animated.View>
-
-                </View>
-
-            </View>
+            <Animated.View style={[styles.base, { height: height / 2, ...animatedStyle }]}>
+                <ScrollView
+                    ref={this.scrollView}
+                    horizontal
+                    bounces={false}
+                    showsHorizontalScrollIndicator={false}
+                    overScrollMode='never'
+                    decelerationRate={0.01}
+                    scrollEventThrottle={50}
+                    onScroll={({ nativeEvent }) => this.calculateCannonPosition(nativeEvent.contentOffset.x)}
+                >
+                    <TouchableWithoutFeedback onPress={this.fire}>
+                        <View style={touchableArea}>
+                            <Animated.View style={[styles.flashView, { opacity: this.opacity }]} >
+                                <Sprite image='cannon' width={options.cannonSize} />
+                            </Animated.View>
+                        </View>
+                    </TouchableWithoutFeedback>
+                </ScrollView>
+            </Animated.View >
         )
     }
 }
 
 const styles = StyleSheet.create({
-    outer: {
-        //backgroundColor: 'green',
+    base: {
         position: 'absolute',
-        justifyContent: 'flex-end',
-        bottom: 4,
+        bottom: -options.cannonSize,
         left: 0,
-        right: 0,
         zIndex: 2
     },
-    inner: {
-        //backgroundColor: 'red',
-        height: 40,
-        justifyContent: 'center',
-        alignItems: 'center'
+    innerView: {
+        //backgroundColor: 'orangered',
+        flexDirection: 'row',
+        alignItems: 'flex-end',
+        justifyContent: 'center'
+    },
+    flashView: {
+        // Senza background, su Android non fa l'animazione alla prima chiamata a CDU (!?)
+        backgroundColor: 'rgba(0,0,0,0)'
     }
 })

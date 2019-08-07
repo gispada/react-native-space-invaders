@@ -1,11 +1,9 @@
 import React, { PureComponent } from 'react'
 import { View, StyleSheet } from 'react-native'
 import Sprite from '../sprite'
+import options from '../../config'
 
 export default class Alien extends PureComponent {
-    static defaultProps = {
-        width: 40
-    }
 
     get type() {
         const { type, variant } = this.props
@@ -13,13 +11,13 @@ export default class Alien extends PureComponent {
     }
 
     render() {
-        const { width, left, bottom } = this.props
+        const { left, bottom } = this.props
 
         const dynamicStyles = [styles.base, { left, bottom }]
 
         return (
             <View style={dynamicStyles}>
-                <Sprite image={this.type} width={width} />
+                <Sprite image={this.type} width={options.alienSize} />
             </View>
         )
     }
@@ -28,8 +26,8 @@ export default class Alien extends PureComponent {
 const styles = StyleSheet.create({
     base: {
         position: 'absolute',
-        width: 46,
-        height: 46,
+        width: options.alienSize,
+        height: options.alienSize,
         alignItems: 'center',
         justifyContent: 'center',
         //backgroundColor: 'blue'

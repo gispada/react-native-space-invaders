@@ -4,18 +4,19 @@ import options from '../../config'
 
 const Star = props => {
 
-    const { position, luminosity } = props
+    const { position, big, luminosity } = props
 
     const allStyles = [
         styles.base,
+        big && { width: options.starSize * 2, height: options.starSize * 2 },
         {
             top: position.y,
             left: position.x,
-            backgroundColor: `rgba(255, 255, 255, ${luminosity})`
-        }
+            backgroundColor: `rgba(255, 255, 255, ${luminosity})`,
+        },
     ]
 
-    return <View style={allStyles}/>
+    return <View style={allStyles} />
 
 }
 

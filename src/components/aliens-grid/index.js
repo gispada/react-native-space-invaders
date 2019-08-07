@@ -1,5 +1,4 @@
 import React, { PureComponent } from 'react'
-import { StyleSheet } from 'react-native'
 import Alien from '../alien'
 
 export default class AliensGrid extends PureComponent {
@@ -27,9 +26,3 @@ export default class AliensGrid extends PureComponent {
         return this.renderAliens()
     }
 }
-
-const styles = StyleSheet.create({
-    base: {
-        //backgroundColor: 'green'
-    }
-})

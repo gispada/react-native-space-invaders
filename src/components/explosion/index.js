@@ -20,6 +20,7 @@ export default class Explosion extends PureComponent {
             <Sprite
                 image={`explosion${variant}`}
                 style={{ position: 'absolute', left: position[0], bottom: position[1] }}
+                width={variant === '1' ? options.alienSize : options.cannonSize}
             />
         )
     }

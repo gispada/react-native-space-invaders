@@ -1,5 +1,6 @@
 import React, { PureComponent } from 'react'
 import Heading from '../heading'
+import options from '../../config'
 
 export default class Score extends PureComponent {
     get formattedPoints() {
@@ -10,6 +11,6 @@ export default class Score extends PureComponent {
     render() {
         const { label } = this.props
 
-        return <Heading upperCase>{label}: <Heading color='#22cc00'>{this.formattedPoints}</Heading></Heading>
+        return <Heading upperCase>{label}: <Heading color={options.mainColor}>{this.formattedPoints}</Heading></Heading>
     }
 }

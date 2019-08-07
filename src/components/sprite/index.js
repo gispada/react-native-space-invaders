@@ -1,17 +1,6 @@
 import React, { PureComponent } from 'react'
 import { Image } from 'react-native'
-
-const sprites = {
-    cannon: require('../../../assets/512/cannon.png'),
-    explosion1: require('../../../assets/512/explosion1.png'),
-    explosion2: require('../../../assets/512/explosion2.png'),
-    alien1_1: require('../../../assets/512/alien1_1.png'),
-    alien1_2: require('../../../assets/512/alien1_2.png'),
-    alien2_1: require('../../../assets/512/alien2_1.png'),
-    alien2_2: require('../../../assets/512/alien2_2.png'),
-    alien3_1: require('../../../assets/512/alien3_1.png'),
-    alien3_2: require('../../../assets/512/alien3_2.png')
-}
+import { sprites } from '../../config'
 
 export default class Sprite extends PureComponent {
     static defaultProps = {
@@ -24,11 +13,11 @@ export default class Sprite extends PureComponent {
     }
 
     render() {
-        const { width, tintColor, style } = this.props
+        const { width, color, style } = this.props
         
         // Auto height
         //const source = Image.resolveAssetSource(img)
         //const height = width / (source.width / source.height)
-        return <Image source={this.image} style={{width, height: width, tintColor, ...style}}/>
+        return <Image source={this.image} style={{width, height: width, tintColor: color, ...style}}/>
     }
 }

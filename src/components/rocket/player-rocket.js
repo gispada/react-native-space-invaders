@@ -2,6 +2,13 @@ import React, { PureComponent } from 'react'
 import { StyleSheet, Animated, Easing } from 'react-native'
 import options from '../../config'
 
+const offset = {
+    bottom: options.alienSize - (options.alienSize * 0.9),
+    top: options.alienSize * 0.9,
+    left: 0,
+    right: 0
+}
+
 export default class PlayerRocket extends PureComponent {
     /*
      * Il giocatore spara verso l'alto, la posizione del razzo è ricavata a partire dal valore di translateY
@@ -14,7 +21,7 @@ export default class PlayerRocket extends PureComponent {
     state = {
         translateY: new Animated.Value(0),
         // x statica, qui per evitare di assegnarla a una costante nelle varie iterazioni del for di checkCollision
-        xPosition: this.props.rocketData.x + 22
+        xPosition: this.props.rocketData.x + (options.cannonSize / 2) - 2.5
     }
 
     componentDidMount() {
@@ -47,7 +54,7 @@ export default class PlayerRocket extends PureComponent {
         }
 
         // position è relativo, parte da 0 rispetto alla posizione di spawn del missile; bisogna compensare
-        const rocketYPosition = position + rocketData.y
+        const rocketYPosition = position + rocketData.y + 15 // altezza missile
         const firstAlien = aliens[0]
         const lastAlien = aliens[aliens.length - 1]
 
@@ -55,11 +62,11 @@ export default class PlayerRocket extends PureComponent {
         if (rocketYPosition < firstAlien.y - 10) return
 
         // Se il missile supera l'ultimo alieno senza colpire, non serve più controllare le collisioni
-        if (rocketYPosition > lastAlien.y + 40) {
+        if (rocketYPosition > lastAlien.y + (options.alienSize - 10)) {
             translateY.removeListener(this.rocketListener)
             return
         }
-        
+
         for (let i = 0; i < aliens.length; i++) {
             /*
              *    1___y2___
@@ -68,10 +75,10 @@ export default class PlayerRocket extends PureComponent {
              *    |________|
              *    0   y1   1
              */
-            const y1Threshold = aliens[i].y // sotto
-            const y2Threshold = y1Threshold + 40 // sopra
-            const x1Threshold = aliens[i].x + 3 // sinistra
-            const x2Threshold = x1Threshold + 43 // destra
+            const y1Threshold = aliens[i].y + offset.bottom // sotto
+            const y2Threshold = y1Threshold + offset.top // sopra
+            const x1Threshold = aliens[i].x // sinistra
+            const x2Threshold = x1Threshold + options.alienSize // destra
 
             // COLPITO!
             // Controlla se il missile è dentro l'hit box dell'alieno (Y1 < missile < Y2 e X1 < missile < X2)
@@ -86,21 +93,19 @@ export default class PlayerRocket extends PureComponent {
     }
 
     render() {
-        const { translateY } = this.state
+        const { translateY, xPosition } = this.state
         const { rocketData } = this.props
-        const animatedStyle = { transform: [{ translateY }], bottom: rocketData.y, left: rocketData.x + 22 }
+        const animatedStyle = { transform: [{ translateY }], bottom: rocketData.y - 10, left: xPosition }
 
         return <Animated.View style={[styles.base, animatedStyle]} />
     }
 }
 
-// onLayout={({nativeEvent}) => {console.log(nativeEvent.layout)} }
-
 const styles = StyleSheet.create({
     base: {
         width: 5,
         height: 15,
-        backgroundColor: 'green',
+        backgroundColor: options.mainColor,
         position: 'absolute'
     }
 })

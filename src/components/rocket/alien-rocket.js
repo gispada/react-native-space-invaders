@@ -14,7 +14,7 @@ export default class AlienRocket extends PureComponent {
     state = {
         translateY: new Animated.Value(0),
         // x statica, qui per evitare di assegnarla a una costante nelle varie iterazioni del for di checkCollision
-        xPosition: this.props.rocketData.x + 22
+        xPosition: this.props.rocketData.x + (options.alienSize / 2) - 2.5 // metà larghezza missile
     }
 
     componentDidMount() {
@@ -47,12 +47,12 @@ export default class AlienRocket extends PureComponent {
         const rocketYPosition = limit - (position + (limit - rocketData.y))
 
         // Prima di arrivare al cannone, non serve controllare
-        if (rocketYPosition > 80) return
+        if (rocketYPosition > options.cannonSize + 20) return
         
         // Per il corretto calcolo delle collisioni, bisogna usare la posizione del giocatore dall'alto, non dal basso
-        const y2Threshold = 50 // sopra: altezza del cannone dal basso, che rimane fissa
-        const x1Threshold = playerXPosition + 0 // sinistra
-        const x2Threshold = x1Threshold + 50 // destra
+        const y2Threshold = options.cannonSize // sopra: altezza del cannone dal basso, che rimane fissa
+        const x1Threshold = playerXPosition // sinistra
+        const x2Threshold = x1Threshold + options.cannonSize // destra
         
         // COLPITO!
         if (rocketYPosition < y2Threshold && rocketXPosition > x1Threshold && rocketXPosition < x2Threshold) {
@@ -63,9 +63,14 @@ export default class AlienRocket extends PureComponent {
     }
 
     render() {
-        const { translateY } = this.state
+        const { translateY, xPosition } = this.state
         const { rocketData } = this.props
-        const animatedStyle = { transform: [{ translateY }], bottom: rocketData.y - 10, left: rocketData.x + 22}
+        
+        const animatedStyle = {
+            transform: [{ translateY }],
+            bottom: rocketData.y - 15, // altezza missile
+            left: xPosition
+        }
 
         return <Animated.View style={[styles.base, animatedStyle]} />
     }

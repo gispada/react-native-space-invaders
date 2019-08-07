@@ -18,7 +18,9 @@ export default class Sky extends PureComponent {
             // Genera un numero tra 0.3 e 1
             const luminosity = (Math.random() * 0.7 + 0.3).toFixed(2)
 
-            return <Star key={id} position={position} luminosity={luminosity}/>
+            const isBig = Math.random() < 0.2
+
+            return <Star key={id} position={position} big={isBig} luminosity={luminosity}/>
 
         })
     }

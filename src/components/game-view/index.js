@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react'
 import { View, StatusBar, StyleSheet, SafeAreaView, Platform } from 'react-native'
-import Controls from '../controls/index2'
+import Controls from '../controls'
 import AliensGrid from '../aliens-grid'
 import PlayerRocket from '../rocket/player-rocket'
 import AlienRocket from '../rocket/alien-rocket'
@@ -33,7 +33,8 @@ export default class GameView extends PureComponent {
             clearExplosion,
             updatePlayerPosition,
             lives,
-            winner
+            winner,
+            exit
         } = this.props
 
         return (
@@ -43,7 +44,7 @@ export default class GameView extends PureComponent {
 
                 <View style={styles.container}>
 
-                    <UpperBar score={score} highest={highest} lives={lives} />
+                    <UpperBar score={score} highest={highest} lives={lives} onButtonPress={exit}/>
 
                     <AliensGrid config={aliens} width={width} height={height} />
 
@@ -57,8 +58,8 @@ export default class GameView extends PureComponent {
 
                     {this.renderRockets()}
 
-                    {winner !== 2 && <Controls fire={fire} width={width} height={height} updatePlayerPosition={updatePlayerPosition} />}
-
+                    {winner !== 2 && <Controls fire={fire} width={width} height={height} updatePlayerPosition={updatePlayerPosition} lives={lives}/>}
+                    
                 </View>
 
                 <Sky width={width} height={height} />

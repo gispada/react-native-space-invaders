@@ -3,8 +3,8 @@ import { StyleSheet, Animated, Easing } from 'react-native'
 import options from '../../config'
 
 const offset = {
-    bottom: options.alienSize - (options.alienSize * 0.9),
-    top: options.alienSize * 0.9,
+    bottom: options.alienSize - (options.alienSize * 0.8),
+    top: options.alienSize * 0.8,
     left: 0,
     right: 0
 }

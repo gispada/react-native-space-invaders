@@ -31,12 +31,12 @@ export default class App extends PureComponent {
 
     // Un alieno in meno, aumentare la velocità
     // Non deve essere chiamato all'init (quando prima c'era un vincitore) o non resetta la velocità!
-    if (!prevState.winner && !!prevState.aliens.length && prevState.aliens.length !== aliens.length) {
+    if (!prevState.winner && prevState.aliens.length && prevState.aliens.length !== aliens.length) {
       this.increaseSpeed(prevState.speed)
     }
 
-    // C'è un vincitore
-    if (winner && prevState.winner !== winner) {
+    // C'è un vincitore (e solo se prima non ce n'erano altri)
+    if (!prevState.winner && winner) {
       winner === 1 ? this.victory() : this.gameOver()
     }
 

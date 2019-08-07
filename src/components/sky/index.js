@@ -15,8 +15,8 @@ export default class Sky extends PureComponent {
                 y: Math.random() * height
             }
 
-            // Genera un numero tra 0.3 e 1
-            const luminosity = (Math.random() * 0.7 + 0.3).toFixed(2)
+            // Genera un numero tra 0.4 e 1
+            const luminosity = (Math.random() * 0.6 + 0.4).toFixed(2)
 
             const isBig = Math.random() < 0.2
 

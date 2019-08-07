@@ -73,8 +73,6 @@ export default class Controls extends PureComponent {
     render() {
         const { width, height } = this.props
 
-        console.log('Controls rendered')
-
         const animatedStyle = { transform: [{ translateY: this.translateY }] }
         const touchableArea = [styles.innerView, { width: width * 2 - options.cannonSize }]
 

@@ -62,7 +62,6 @@ export default class App extends PureComponent {
       down: false
     }
     this.setState(this.state.winner === 1 ? { ...common } : { ...common, lives: options.numberOfLives, aliens: [], score: 0 })
-    if (this.gameLoop) clearInterval(this.gameLoop)
   }
 
 

@@ -173,10 +173,7 @@ export default class App extends PureComponent {
 
 
   renderFrame() {
-    const { direction, down, aliens: stateAliens } = this.state
-
-    // A volte a partita terminata, con 0 alieni, c'è ancora una chiamata a renderFrame, che fa crashare tutto
-    if (!stateAliens.length) return
+    const { direction, down } = this.state
 
     const dX = down ? 0 : options.aliensHorStep * direction
     const dY = down ? options.aliensVerStep : 0

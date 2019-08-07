@@ -31,7 +31,8 @@ export default class App extends PureComponent {
 
     // Un alieno in meno, aumentare la velocità
     // Non deve essere chiamato all'init (quando prima c'era un vincitore) o non resetta la velocità!
-    if (!prevState.winner && prevState.aliens.length && prevState.aliens.length !== aliens.length) {
+    // Non va chiamato neanche all'ultimo alieno, non serve e rimane un interval attivo
+    if (!prevState.winner && prevState.aliens.length > 1 && prevState.aliens.length !== aliens.length) {
       this.increaseSpeed(prevState.speed)
     }
 

@@ -49,7 +49,6 @@ export default class AlienRocket extends PureComponent {
         // Prima di arrivare al cannone, non serve controllare
         if (rocketYPosition > options.cannonSize + 20) return
         
-        // Per il corretto calcolo delle collisioni, bisogna usare la posizione del giocatore dall'alto, non dal basso
         const y2Threshold = options.cannonSize // sopra: altezza del cannone dal basso, che rimane fissa
         const x1Threshold = playerXPosition // sinistra
         const x2Threshold = x1Threshold + options.cannonSize // destra

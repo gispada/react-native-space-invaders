@@ -12,6 +12,7 @@ export default class Controls extends PureComponent {
         this.cannonXPosition = this.props.width / 2
         this.translateY = new Animated.Value(0)
         this.opacity = new Animated.Value(1)
+        this.coolDown = false
     }
 
     componentDidMount() {
@@ -33,6 +34,7 @@ export default class Controls extends PureComponent {
 
     componentDidUpdate(prevProps, prevState) {
         if (this.props.lives > 0 && prevProps.lives !== this.props.lives) {
+            // Effetto lampeggiante quando il cannone viene colpito
             Animated.sequence([
                 Animated.timing(this.opacity, {
                     toValue: 0.2,
@@ -53,13 +55,12 @@ export default class Controls extends PureComponent {
     fire = () => {
         const { fire } = this.props
 
-        // Passa a fire() la posizione del cannone, per sincronizzare il proiettile
+        // Prima della scadenza del periodo di cool down non si può sparare
         if (!this.coolDown) {
             fire({ x: this.cannonXPosition, y: options.cannonSize })
             this.coolDown = true
             setTimeout(() => this.coolDown = false, options.rocketCoolDown)
         }
-
     }
 
     calculateCannonPosition(offset) {
@@ -115,7 +116,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center'
     },
     flashView: {
-        // Senza background, su Android non fa l'animazione alla prima chiamata a CDU (!?)
+        // Senza background su Android non fa l'animazione alla prima chiamata a cDU (!?)
         backgroundColor: 'rgba(0,0,0,0)'
     }
 })

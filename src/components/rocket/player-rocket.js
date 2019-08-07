@@ -4,9 +4,7 @@ import options from '../../config'
 
 const offset = {
     bottom: options.alienSize - (options.alienSize * 0.8),
-    top: options.alienSize * 0.8,
-    left: 0,
-    right: 0
+    top: options.alienSize * 0.8
 }
 
 export default class PlayerRocket extends PureComponent {
